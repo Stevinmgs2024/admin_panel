@@ -1,0 +1,26 @@
+// If you want to override variables do it here
+@import "variables";
+
+// Import styles
+@import "@coreui/coreui/scss/coreui";
+@import "@coreui/chartjs/scss/coreui-chartjs";
+
+// Vendors
+@import "vendors/simplebar";
+
+// Custom styles for this theme
+@import "theme";
+
+// If you want to add custom CSS you can put it here
+@import "custom";
+
+.icon-wrapper {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fbfbfb;
+    border-radius: 50%;
+  }
+  
