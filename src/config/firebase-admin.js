@@ -1,6 +1,11 @@
 import admin from 'firebase-admin';
 import path from 'path';
-import { getAuth } from "firebase-admin/auth"; // Is this not needed ??
+import { getAuth } from "firebase-admin/auth";
+
+/*
+ * The firebase admin sdk can only be run by node in our case
+ * The admin sdk is mainly used here for handle user account actions
+ */
 
 // Function to initialize Firebase Admin
 export function initializeFirebase() {
@@ -10,6 +15,8 @@ export function initializeFirebase() {
   /*const serviceAccount = import('./path/to/serviceAccountKey.json', {
     assert: { type: 'json' }
   });*/
+
+    // This should be set using an optioins menue in the ui
     const serviceAccount = {
       "type": "service_account",
       "project_id": "employeeapp-f3d3f",
@@ -23,7 +30,7 @@ export function initializeFirebase() {
       "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-igzqt%40employeeapp-f3d3f.iam.gserviceaccount.com",
       "universe_domain": "googleapis.com"
     }
-    
+
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
@@ -52,6 +59,7 @@ export async function createUser(displayName, email, password, role) {
 }
 
 // Function to get data from Firestore
+// This is probably not needed here
 export async function getDataFromFirestore() {
   const db = admin.firestore();
   const snapshot = await db.collection('your-collection').get();

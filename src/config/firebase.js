@@ -1,7 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc, setDoc, query, where} from "firebase/firestore";
-
 import { getAuth, signInWithEmailAndPassword} from "firebase/auth";
+
+/*
+ * This file contains the functions for general firebase actions
+ */
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -169,10 +172,10 @@ export const fetchPunchRecords = async (startDate, endDate) => {
 
       punchSnapshots.forEach((punchDoc) => {
         const punchData = punchDoc.data();
-        
+
         // Convert timestamp to Date object if it exists
         const recordTimestamp = punchData.timestamp?.toDate() || new Date(punchData.punch_in_time);
-        
+
         // Apply date range filter if provided
         if (startDate && recordTimestamp < startDate) return;
         if (endDate && recordTimestamp > endDate) return;
@@ -219,11 +222,11 @@ export const calculatePunchStatistics = (records) => {
 
   records.forEach(record => {
     if (!record.punchInTime) return;
-    
+
     const punchInDate = new Date(record.punchInTime);
-    
+
     // Check if late (after 9:15 AM)
-    if (punchInDate.getHours() > workStartHour || 
+    if (punchInDate.getHours() > workStartHour ||
         (punchInDate.getHours() === workStartHour && punchInDate.getMinutes() > 15)) {
       stats.late++;
     } else {
@@ -236,7 +239,7 @@ export const calculatePunchStatistics = (records) => {
     } else {
       const punchOutDate = new Date(record.punchOutTime);
       const workHours = (punchOutDate - punchInDate) / (1000 * 60 * 60);
-      
+
       if (workHours < 8) {
         stats.earlyDepartures++;
       }
@@ -246,7 +249,7 @@ export const calculatePunchStatistics = (records) => {
     }
   });
 
-  stats.averageWorkHours = validWorkHourRecords ? 
+  stats.averageWorkHours = validWorkHourRecords ?
     (totalWorkHours / validWorkHourRecords).toFixed(2) : 0;
 
   return stats;

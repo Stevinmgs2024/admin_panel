@@ -4,6 +4,10 @@ import fs from 'fs';
 import { initializeFirebase, createUser, getDataFromFirestore, listAllUsers, getUserRole, getUserById, updateUser } from './src/config/firebase-admin.js';
 import { listAllProducts, addProduct  } from './src/config/firebase.js';
 
+/*
+ * This is the main file for the electron app
+ */
+
 // Initialize Firebase Admin before opening the window
 initializeFirebase();
 
@@ -86,6 +90,7 @@ ipcMain.handle('update-user', async (event, { uid, name, email, password, role }
   }
 });
 
+// If an error occurs we can pass it to this handler to display to the user
 ipcMain.on('show-error', (event, title, content) => {
   dialog.showErrorBox(title, content);
 });

@@ -2,6 +2,10 @@ import { useContext, createContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleLogin } from "./config/firebase";
 
+/*
+ * This component is used to pass the user object to all the pages for auth
+ */
+
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
@@ -27,6 +31,7 @@ const AuthProvider = ({ children }) => {
     /*setUser(null);
     setToken("");
     localStorage.removeItem("site");*/
+    //This feature still needs to be implemented
     navigate("/login");
   };
 

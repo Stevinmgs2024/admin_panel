@@ -1,5 +1,10 @@
 import React from 'react'
 
+/*
+ * This file is accessed by the components/AppContent to generate the routes
+ */
+
+
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Users = React.lazy(() => import('./views/user/Users'))
 const AddUser = React.lazy(() => import('./views/user/AddUser'))
