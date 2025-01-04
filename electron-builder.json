@@ -2,7 +2,7 @@
   "appId": "com.magnori.mag",
   "files": [
     "dist-react",
-    "envs",
+    "envs.js",
     "main.js",
     "src/config",
     "public",

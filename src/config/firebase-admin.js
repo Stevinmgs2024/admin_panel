@@ -1,6 +1,7 @@
 import admin from 'firebase-admin';
 import path from 'path';
 import { getAuth } from "firebase-admin/auth";
+import {serviceAccount as sA}  from "../../envs.js";
 
 /*
  * The firebase admin sdk can only be run by node in our case
@@ -9,30 +10,9 @@ import { getAuth } from "firebase-admin/auth";
 
 // Function to initialize Firebase Admin
 export function initializeFirebase() {
-  const serviceAccountPath = path.join(process.cwd(), 'envs', 'firebase-admin-key.json'); // Adjust path as needed
-
   try {
-  /*const serviceAccount = import('./path/to/serviceAccountKey.json', {
-    assert: { type: 'json' }
-  });*/
-
-    // This should be set using an optioins menue in the ui
-    const serviceAccount = {
-      "type": "service_account",
-      "project_id": "employeeapp-f3d3f",
-      "private_key_id": "",
-      "private_key": "-----BEGIN PRIVATE KEY-----\n\n-----END PRIVATE KEY-----\n",
-      "client_email": "firebase-adminsdk-igzqt@employeeapp-f3d3f.iam.gserviceaccount.com",
-      "client_id": "",
-      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-      "token_uri": "https://oauth2.googleapis.com/token",
-      "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-      "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-igzqt%40employeeapp-f3d3f.iam.gserviceaccount.com",
-      "universe_domain": "googleapis.com"
-    }
-
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: admin.credential.cert(sA),
     });
     console.log('Firebase Admin initialized successfully.');
   } catch (error) {
@@ -75,7 +55,6 @@ export async function listAllUsers(nextPageToken, allUsers = []) {
     // Add the current batch of users to the allUsers array
     listUsersResult.users.forEach((userRecord) => {
       allUsers.push(userRecord); // Collect user records
-      console.log(getUserRole(userRecord.uid));
     });
 
     // Check for the next page token and fetch more users if available

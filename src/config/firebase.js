@@ -1,25 +1,14 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc, setDoc, query, where} from "firebase/firestore";
 import { getAuth, signInWithEmailAndPassword} from "firebase/auth";
+import {firebaseConfig as fC}  from "../../envs.js";
 
 /*
  * This file contains the functions for general firebase actions
  */
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "",
-  authDomain: "employeeapp-f3d3f.firebaseapp.com",
-  projectId: "employeeapp-f3d3f",
-  storageBucket: "employeeapp-f3d3f.firebasestorage.app",
-  messagingSenderId: "",
-  appId: "1:288311010212:web:512f5a59edaaa3fbcf5731",
-  measurementId: "G-VK2F3QW794"
-};
-
-
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(fC);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
