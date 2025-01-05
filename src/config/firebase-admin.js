@@ -86,8 +86,13 @@ export async function getUserById(uid) {
   try {
     console.log("Fetching");
     const userRecord = await getAuth().getUser(uid);
-    console.log(`Successfully fetched user data: ${userRecord.toJSON()}`);
-    return userRecord;
+    const role = await getUserRole(uid);
+    const userWithRole = {
+          ...userRecord.toJSON(),
+          role: role,
+        };
+    console.log(`Successfully fetched user data: ${userWithRole}`);
+    return userWithRole;
   } catch (error) {
     console.log('Error fetching user data:', error);
     throw error;  // Optionally re-throw the error to propagate it
@@ -112,17 +117,16 @@ export async function getUserById(uid) {
 }*/
 
 
-export async function updateUser(uid, name, email, password, role) {
-  console.log("TT: ",uid);
-  if(password) {
+export async function updateUser(updatedData) {
+  if(updatedData.password) {
     try {
-      const userRecord = await getAuth().updateUser(uid, {
-        email: email,
-        password: password,
-        displayName: name,
+      const userRecord = await getAuth().updateUser(updatedData.uid, {
+        email: updatedData.email,
+        password: updatedData.password,
+        displayName: updatedData.displayName,
       });
       // Use async/await for setCustomUserClaims
-      await admin.auth().setCustomUserClaims(userRecord.uid, { role: role });
+      await admin.auth().setCustomUserClaims(userRecord.uid, { role: updatedData.role });
       console.log('Successfully updated user', userRecord.toJSON());
     } catch (error) {
       console.log('Error updating user:', error);
@@ -132,12 +136,12 @@ export async function updateUser(uid, name, email, password, role) {
   else {
     console.log("no change to password");
     try {
-      const userRecord = await getAuth().updateUser(uid, {
-        email: email,
-        displayName: name,
+      const userRecord = await getAuth().updateUser(updatedData.uid, {
+        email: updatedData.email,
+        displayName: updatedData.name,
       });
       // Use async/await for setCustomUserClaims
-      await admin.auth().setCustomUserClaims(userRecord.uid, { role: role });
+      await admin.auth().setCustomUserClaims(userRecord.uid, { role: updatedData.role });
       console.log('Successfully updated user', userRecord.toJSON());
     } catch (error) {
       console.log('Error updating user:', error);

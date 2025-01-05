@@ -81,10 +81,11 @@ ipcMain.handle('get-user', async (event, uid) => {
 });
 
 
-ipcMain.handle('update-user', async (event, { uid, name, email, password, role }) => {
+ipcMain.handle('update-user', async (event, data) => {
   try {
-    console.log("AD:",{uid, name, email, password, role});
-    return updateUser(uid, name, email, password, role);
+    //console.log("AD:",{uid, name, email, password, role});
+    console.log("AD:",data.uid);
+    return updateUser(data);
   } catch (error) {
     throw new Error(error.message); // Throw error to be caught in the renderer process
   }

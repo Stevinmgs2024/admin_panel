@@ -12,7 +12,7 @@ const EditUser = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: '',
+    role: 'user',
   });
   const [loading, setLoading] = useState(true);  // Initially loading data
   const [error, setError] = useState('');
@@ -44,6 +44,7 @@ const EditUser = () => {
     e.preventDefault();
 
     const { displayName, email, password, confirmPassword, role } = formData;
+    console.log("R:", role);
 
     // Basic validation
     if (password && password !== confirmPassword) {
@@ -77,7 +78,7 @@ const EditUser = () => {
 
     // Only pass password if it's set (to avoid updating with an empty password if not required)
     const dataToSubmit = {
-      userId,
+      uid: userId,
       displayName,
       email,
       role,
