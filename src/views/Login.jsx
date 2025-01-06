@@ -17,7 +17,7 @@ import CIcon from '@coreui/icons-react';
 import { cilLockLocked, cilUser } from '@coreui/icons';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useAuth } from '../../../AuthProvider.js';
+import { useAuth } from '../AuthProvider.js';
 
 const Login = () => {
   const auth = useAuth();
