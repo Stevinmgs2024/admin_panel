@@ -2,6 +2,7 @@ import admin from 'firebase-admin';
 import path from 'path';
 import { getAuth } from "firebase-admin/auth";
 import {serviceAccount as sA}  from "../../envs.js";
+import { addUserToDb, updateUserInDb} from "./firebase.js";
 
 /*
  * The firebase admin sdk can only be run by node in our case
@@ -30,6 +31,7 @@ export async function createUser(displayName, email, password, role) {
     });
     console.log(role);
     await admin.auth().setCustomUserClaims(userRecord.uid, { role: role });
+    addUserToDb(userRecord, role);
 
     return userRecord;
   } catch (error) {
@@ -118,6 +120,7 @@ export async function getUserById(uid) {
 
 
 export async function updateUser(updatedData) {
+  console.log("CHECK: ", updatedData.displayName);
   if(updatedData.password) {
     try {
       const userRecord = await getAuth().updateUser(updatedData.uid, {
@@ -127,6 +130,9 @@ export async function updateUser(updatedData) {
       });
       // Use async/await for setCustomUserClaims
       await admin.auth().setCustomUserClaims(userRecord.uid, { role: updatedData.role });
+
+      await updateUserInDb(userRecord.uid, updatedData);
+
       console.log('Successfully updated user', userRecord.toJSON());
     } catch (error) {
       console.log('Error updating user:', error);
@@ -138,10 +144,11 @@ export async function updateUser(updatedData) {
     try {
       const userRecord = await getAuth().updateUser(updatedData.uid, {
         email: updatedData.email,
-        displayName: updatedData.name,
+        displayName: updatedData.displayName,
       });
       // Use async/await for setCustomUserClaims
       await admin.auth().setCustomUserClaims(userRecord.uid, { role: updatedData.role });
+      await updateUserInDb(userRecord.uid, updatedData);
       console.log('Successfully updated user', userRecord.toJSON());
     } catch (error) {
       console.log('Error updating user:', error);

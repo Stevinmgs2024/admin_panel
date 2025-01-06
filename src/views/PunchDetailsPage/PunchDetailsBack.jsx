@@ -12,12 +12,13 @@ const PunchDetailsBack = {
         const employeeId = employeeDoc.id;
         const punchInsRef = collection(employeeDoc.ref, 'punch_ins');
         const punchSnapshots = await getDocs(punchInsRef);
+        console.log(employeeDoc.ref, employeeId);
 
         punchSnapshots.forEach((punchDoc) => {
           const punchData = punchDoc.data();
           const timestamp = punchData.timestamp?.toDate();
 
-          if ((!startDate || timestamp >= startDate) && 
+          if ((!startDate || timestamp >= startDate) &&
               (!endDate || timestamp <= endDate)) {
             records.push({
               employeeId,
@@ -57,9 +58,9 @@ const PunchDetailsBack = {
 
     records.forEach(record => {
       const punchInDate = new Date(record.punchInTime);
-      
+
       // Check if late (after 9:15 AM)
-      if (punchInDate.getHours() > workStartHour || 
+      if (punchInDate.getHours() > workStartHour ||
           (punchInDate.getHours() === workStartHour && punchInDate.getMinutes() > 15)) {
         stats.late++;
       } else {
@@ -72,7 +73,7 @@ const PunchDetailsBack = {
       } else {
         const punchOutDate = new Date(record.punchOutTime);
         const workHours = (punchOutDate - punchInDate) / (1000 * 60 * 60);
-        
+
         if (workHours < 8) {
           stats.earlyDepartures++;
         }
@@ -82,7 +83,7 @@ const PunchDetailsBack = {
       }
     });
 
-    stats.averageWorkHours = validWorkHourRecords ? 
+    stats.averageWorkHours = validWorkHourRecords ?
       (totalWorkHours / validWorkHourRecords).toFixed(2) : 0;
 
     return stats;

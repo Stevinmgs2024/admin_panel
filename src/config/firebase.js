@@ -158,6 +158,7 @@ export const fetchPunchRecords = async (startDate, endDate) => {
       const employeeId = employeeDoc.id;
       const punchInsRef = collection(db, "employees", employeeId, "punch_ins");
       const punchSnapshots = await getDocs(punchInsRef);
+      console.log("ads",employeeDoc.ref, employeeId);
 
       punchSnapshots.forEach((punchDoc) => {
         const punchData = punchDoc.data();
@@ -343,3 +344,37 @@ export const updateQuotation = async (qid, data) => {
 };*/
 
 // These are the functions related to Requests
+//
+
+// These are the functions related to employees
+export async function addUserToDb(userRecord, role) {
+  const userDetails = {
+    email: userRecord.email,
+    displayName: userRecord.displayName,
+    role: role,
+  }
+
+  try {
+    await setDoc(doc(db, "employess", userRecord.uid), userDetails);
+    console.log(userDetails);
+  } catch(error) {
+    console.error("Error writing document: ", error);
+  }
+};
+
+export async function updateUserInDb(uid, updatedData) {
+  const userDetails = {
+    email: updatedData.email,
+    displayName: updatedData.displayName,
+    role: updatedData.role,
+  };
+
+  try {
+    // Update the document in the "employees" collection
+    await setDoc(doc(db, "employess", uid), userDetails, { merge: true });
+    console.log("User document successfully updated in Firestore");
+  } catch (error) {
+    console.error("Error updating user document in Firestore: ", error);
+  }
+};
+
