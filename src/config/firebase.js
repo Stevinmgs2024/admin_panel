@@ -147,7 +147,8 @@ export const fetchQuotationById = async (id) => {
     console.error("Error fetching quotation by ID:", error);
   }
 };
-// Fetch punch records for a date range
+
+//Fetch punchin details
 export const fetchPunchRecords = async (startDate, endDate) => {
   try {
     const employeesRef = collection(db, "employees");
@@ -158,35 +159,35 @@ export const fetchPunchRecords = async (startDate, endDate) => {
       const employeeId = employeeDoc.id;
       const punchInsRef = collection(db, "employees", employeeId, "punch_ins");
       const punchSnapshots = await getDocs(punchInsRef);
-      console.log("ads",employeeDoc.ref, employeeId);
 
       punchSnapshots.forEach((punchDoc) => {
         const punchData = punchDoc.data();
 
-        // Convert timestamp to Date object if it exists
+        // Parse timestamps from Firestore or the string format
         const recordTimestamp = punchData.timestamp?.toDate() || new Date(punchData.punch_in_time);
 
-        // Apply date range filter if provided
+        // Filter by date range if specified
         if (startDate && recordTimestamp < startDate) return;
         if (endDate && recordTimestamp > endDate) return;
 
         records.push({
           id: punchDoc.id,
           employeeId,
-          photoUrl: punchData.photo_url || '',
+          photoUrl: punchData.photo_url || "",
           location: punchData.location || null,
-          punchInTime: punchData.punch_in_time || '',
-          punchOutTime: punchData.punch_out_time || '',
+          punchInTime: punchData.punch_in_time || "",
+          punchOutTime: punchData.punch_out_time || "",
           timestamp: recordTimestamp,
-          userEmail: punchData.user_email || '',
-          userId: punchData.user_id || ''
+          userEmail: punchData.user_email || "",
+          userId: punchData.user_id || "",
         });
       });
     }
 
-    // Sort records by timestamp descending (most recent first)
+    // Sort records by timestamp in descending order
     records.sort((a, b) => b.timestamp - a.timestamp);
 
+    console.log("Fetched Records:", records); // Debug output
     return records;
   } catch (error) {
     console.error("Error fetching punch records:", error);
@@ -194,41 +195,42 @@ export const fetchPunchRecords = async (startDate, endDate) => {
   }
 };
 
-// Calculate statistics from punch records
 export const calculatePunchStatistics = (records) => {
   const stats = {
-    totalEmployees: new Set(records.map(r => r.employeeId)).size,
+    totalEmployees: new Set(records.map((r) => r.employeeId)).size,
     totalPunches: records.length,
     onTime: 0,
     late: 0,
     earlyDepartures: 0,
     missingPunchOut: 0,
-    averageWorkHours: 0
+    averageWorkHours: 0,
   };
 
-  const workStartHour = 9;
+  const workStartHour = 9; // Start of work day
   let totalWorkHours = 0;
   let validWorkHourRecords = 0;
 
-  records.forEach(record => {
+  records.forEach((record) => {
     if (!record.punchInTime) return;
 
     const punchInDate = new Date(record.punchInTime);
 
     // Check if late (after 9:15 AM)
-    if (punchInDate.getHours() > workStartHour ||
-        (punchInDate.getHours() === workStartHour && punchInDate.getMinutes() > 15)) {
+    if (
+      punchInDate.getHours() > workStartHour ||
+      (punchInDate.getHours() === workStartHour && punchInDate.getMinutes() > 15)
+    ) {
       stats.late++;
     } else {
       stats.onTime++;
     }
 
-    // Check punch out status
+    // Check punch-out status
     if (!record.punchOutTime) {
       stats.missingPunchOut++;
     } else {
       const punchOutDate = new Date(record.punchOutTime);
-      const workHours = (punchOutDate - punchInDate) / (1000 * 60 * 60);
+      const workHours = (punchOutDate - punchInDate) / (1000 * 60 * 60); // Convert to hours
 
       if (workHours < 8) {
         stats.earlyDepartures++;
@@ -239,11 +241,15 @@ export const calculatePunchStatistics = (records) => {
     }
   });
 
-  stats.averageWorkHours = validWorkHourRecords ?
-    (totalWorkHours / validWorkHourRecords).toFixed(2) : 0;
+  stats.averageWorkHours = validWorkHourRecords
+    ? (totalWorkHours / validWorkHourRecords).toFixed(2)
+    : 0;
 
+  console.log("Calculated Stats:", stats); // Debug output
   return stats;
 };
+
+
 //Request Page functions
 
 // Fetch all pending requests

@@ -1,5 +1,3 @@
-// PunchDetailsPage.js
-
 import React, { useState, useEffect } from 'react';
 import {
   CCard,
@@ -7,20 +5,16 @@ import {
   CCardHeader,
   CCol,
   CRow,
-  CButton,
   CTable,
   CTableHead,
   CTableBody,
   CTableRow,
   CTableHeaderCell,
   CTableDataCell,
-  CFormInput,
   CAlert,
   CSpinner,
 } from '@coreui/react';
 import { CChartBar } from '@coreui/react-chartjs';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import { fetchPunchRecords, calculatePunchStatistics } from '../../config/firebase';
 import { CIcon } from '@coreui/icons-react';
 import {
@@ -31,7 +25,7 @@ import {
   cilAvTimer,
   cilChevronDoubleDown,
 } from '@coreui/icons';
-import '@coreui/coreui/dist/css/coreui.min.css'; // Ensure CoreUI styles are included
+import '@coreui/coreui/dist/css/coreui.min.css';
 
 const PunchDetailsPage = () => {
   const [loading, setLoading] = useState(false);
@@ -46,25 +40,16 @@ const PunchDetailsPage = () => {
     earlyDepartures: 0,
     missingPunchOut: 0,
   });
-  const [dateRange, setDateRange] = useState({
-    startDate: null,
-    endDate: null,
-  });
 
+  // Fetch all records and calculate statistics
   const fetchRecords = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const startDateTime = dateRange.startDate
-        ? new Date(dateRange.startDate).setHours(0, 0, 0, 0)
-        : null;
-      const endDateTime = dateRange.endDate
-        ? new Date(dateRange.endDate).setHours(23, 59, 59, 999)
-        : null;
-
-      const fetchedRecords = await fetchPunchRecords(startDateTime, endDateTime);
+      const fetchedRecords = await fetchPunchRecords(null, null); // Fetch all records
       setRecords(fetchedRecords);
+
       const calculatedStats = calculatePunchStatistics(fetchedRecords);
       setStats(calculatedStats);
     } catch (err) {
@@ -75,6 +60,11 @@ const PunchDetailsPage = () => {
     }
   };
 
+  useEffect(() => {
+    fetchRecords(); // Fetch records on component mount
+  }, []);
+
+  // Helper function to render icons for stat cards
   const getIcon = (name) => {
     switch (name) {
       case 'Total Employees':
@@ -94,6 +84,7 @@ const PunchDetailsPage = () => {
     }
   };
 
+  // Cards to display key statistics
   const statCards = [
     { title: 'Total Employees', value: stats.totalEmployees },
     { title: 'Total Punches', value: stats.totalPunches },
@@ -103,6 +94,7 @@ const PunchDetailsPage = () => {
     { title: 'Early Departures', value: stats.earlyDepartures },
   ];
 
+  // Data for the attendance overview chart
   const chartData = {
     labels: ['On Time', 'Late', 'Early Departures', 'Missing Punch Out'],
     datasets: [
@@ -122,46 +114,14 @@ const PunchDetailsPage = () => {
             <h4>Punch Details Dashboard</h4>
           </CCardHeader>
           <CCardBody>
-            <CRow className="mb-4">
-              <CCol md={4}>
-                <label>Start Date</label>
-                <DatePicker
-                  selected={dateRange.startDate}
-                  onChange={(date) => setDateRange((prev) => ({ ...prev, startDate: date }))}
-                  selectsStart
-                  startDate={dateRange.startDate}
-                  endDate={dateRange.endDate}
-                  dateFormat="MM/dd/yyyy"
-                  customInput={<CFormInput />}
-                />
-              </CCol>
-              <CCol md={4}>
-                <label>End Date</label>
-                <DatePicker
-                  selected={dateRange.endDate}
-                  onChange={(date) => setDateRange((prev) => ({ ...prev, endDate: date }))}
-                  selectsEnd
-                  startDate={dateRange.startDate}
-                  endDate={dateRange.endDate}
-                  minDate={dateRange.startDate}
-                  dateFormat="MM/dd/yyyy"
-                  customInput={<CFormInput />}
-                />
-              </CCol>
-              <CCol md={4}>
-                <CButton color="primary" onClick={fetchRecords} disabled={loading} className="w-100">
-                  {loading ? <CSpinner size="sm" /> : 'Fetch Records'}
-                </CButton>
-              </CCol>
-            </CRow>
-
+            {loading && <CSpinner size="sm" />}
             {error && <CAlert color="danger">{error}</CAlert>}
 
             <CRow className="mb-4">
-              <CCol xs={13}>
+              <CCol xs={12}>
                 <CRow className="mb-3">
                   {statCards.map((stat, index) => (
-                    <CCol xs="12" sm="6" md="5" key={index}>
+                    <CCol xs="12" sm="6" md="4" key={index}>
                       <CCard className="h-100">
                         <CCardBody className="d-flex justify-content-between align-items-center">
                           <div>
