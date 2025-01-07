@@ -149,7 +149,7 @@ export const fetchQuotationById = async (id) => {
 };
 
 //Fetch punchin details
-export const fetchPunchRecords = async () => {
+/*export const fetchPunchRecords = async () => {
   try {
     const employeesRef = collection(db, "employess");
     const employeeSnapshots = await getDocs(employeesRef);
@@ -177,19 +177,65 @@ export const fetchPunchRecords = async () => {
           userEmail: punchData.user_email || "",
           userId: punchData.user_id || "",
         });
+        console.log("\nreached inner loop");
+        console.log("current Records:", records);
       });
+      console.log("Fetched Records:", records);
     }
 
     // Sort records by timestamp descending
     records.sort((a, b) => b.timestamp - a.timestamp);
 
-    console.log("Fetched Records:", records); // Debug output
+    console.log("Total Records:", records); // Debug output
+    return records;
+  } catch (error) {
+    console.error("Error fetching punch records:", error);
+    throw error;
+  }
+};*/
+
+export const fetchPunchRecords = async () => {
+  try {
+    const employeesRef = collection(db, "employess");
+    const employeeSnapshots = await getDocs(employeesRef);
+    console.log("Employee Documents:", employeeSnapshots.docs.map(doc => doc.id)); // Log employee IDs
+
+    let records = [];
+
+    for (const employeeDoc of employeeSnapshots.docs) {
+      const employeeId = employeeDoc.id;
+      const punchInsRef = collection(db, "employess", employeeId, "punch_ins");
+      const punchSnapshots = await getDocs(punchInsRef);
+
+      console.log(`Documents in punch_ins for ${employeeId}:`, punchSnapshots.size);
+
+      punchSnapshots.forEach((punchDoc) => {
+        const punchData = punchDoc.data();
+        console.log("Punch Doc Data:", punchData);
+
+        records.push({
+          id: punchDoc.id,
+          employeeId,
+          photoUrl: punchData.photo_url || "",
+          location: punchData.location || null,
+          punchInTime: punchData.punch_in_time || "",
+          punchOutTime: punchData.punch_out_time || "",
+          timestamp: punchData.timestamp?.toDate(),
+          userEmail: punchData.user_email || "",
+          userId: punchData.user_id || "",
+        });
+      });
+    }
+
+    console.log("Final Records:", records);
     return records;
   } catch (error) {
     console.error("Error fetching punch records:", error);
     throw error;
   }
 };
+
+
 
 export const calculatePunchStatistics = (records) => {
   const stats = {
