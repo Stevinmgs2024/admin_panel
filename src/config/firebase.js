@@ -149,26 +149,22 @@ export const fetchQuotationById = async (id) => {
 };
 
 //Fetch punchin details
-export const fetchPunchRecords = async (startDate, endDate) => {
+export const fetchPunchRecords = async () => {
   try {
-    const employeesRef = collection(db, "employees");
+    const employeesRef = collection(db, "employess");
     const employeeSnapshots = await getDocs(employeesRef);
     let records = [];
 
     for (const employeeDoc of employeeSnapshots.docs) {
       const employeeId = employeeDoc.id;
-      const punchInsRef = collection(db, "employees", employeeId, "punch_ins");
+      const punchInsRef = collection(db, "employess", employeeId, "punch_ins");
       const punchSnapshots = await getDocs(punchInsRef);
 
       punchSnapshots.forEach((punchDoc) => {
         const punchData = punchDoc.data();
 
-        // Parse timestamps from Firestore or the string format
+        // Parse timestamps from Firestore or string format
         const recordTimestamp = punchData.timestamp?.toDate() || new Date(punchData.punch_in_time);
-
-        // Filter by date range if specified
-        if (startDate && recordTimestamp < startDate) return;
-        if (endDate && recordTimestamp > endDate) return;
 
         records.push({
           id: punchDoc.id,
@@ -184,7 +180,7 @@ export const fetchPunchRecords = async (startDate, endDate) => {
       });
     }
 
-    // Sort records by timestamp in descending order
+    // Sort records by timestamp descending
     records.sort((a, b) => b.timestamp - a.timestamp);
 
     console.log("Fetched Records:", records); // Debug output

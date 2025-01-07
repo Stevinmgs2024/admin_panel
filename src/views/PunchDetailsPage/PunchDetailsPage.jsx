@@ -41,13 +41,13 @@ const PunchDetailsPage = () => {
     missingPunchOut: 0,
   });
 
-  // Fetch all records and calculate statistics
+  // Fetch records and calculate statistics
   const fetchRecords = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const fetchedRecords = await fetchPunchRecords(null, null); // Fetch all records
+      const fetchedRecords = await fetchPunchRecords();
       setRecords(fetchedRecords);
 
       const calculatedStats = calculatePunchStatistics(fetchedRecords);
@@ -64,7 +64,7 @@ const PunchDetailsPage = () => {
     fetchRecords(); // Fetch records on component mount
   }, []);
 
-  // Helper function to render icons for stat cards
+  // Render icons for stat cards
   const getIcon = (name) => {
     switch (name) {
       case 'Total Employees':
