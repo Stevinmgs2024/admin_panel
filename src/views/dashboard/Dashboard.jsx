@@ -14,9 +14,8 @@ import {
   CAlert,
   CSpinner,
 } from '@coreui/react';
-import { CChartBar, CChartPie, CChartLine } from '@coreui/react-chartjs';
+import { CChartPie, CChartLine } from '@coreui/react-chartjs';
 import { fetchPunchRecords, fetchQuotations, getPendingRequests, listAllProducts } from '../../config/firebase';
-import WidgetsDropdown from '../widgets/WidgetsDropdown';
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -88,30 +87,44 @@ const Dashboard = () => {
         </div>
       ) : (
         <>
-          {/* Summary Widgets */}
-          <WidgetsDropdown stats={stats} />
-
-          {/* Graphs */}
+          {/* Info Cards */}
           <CRow>
-            <CCol xs={12} md={6}>
-              <CCard>
-                <CCardHeader>Product Popularity</CCardHeader>
+            <CCol xs={12} md={3}>
+              <CCard className="mb-4">
                 <CCardBody>
-                  <CChartBar
-                    data={{
-                      labels: products.map((p) => p.name),
-                      datasets: [
-                        {
-                          label: 'Quantity Sold',
-                          backgroundColor: '#4caf50',
-                          data: products.map((p) => p.sold || 0),
-                        },
-                      ],
-                    }}
-                  />
+                  <h5>Total Employees</h5>
+                  <p>{stats.totalEmployees}</p>
                 </CCardBody>
               </CCard>
             </CCol>
+            <CCol xs={12} md={3}>
+              <CCard className="mb-4">
+                <CCardBody>
+                  <h5>Total Products</h5>
+                  <p>{stats.totalProducts}</p>
+                </CCardBody>
+              </CCard>
+            </CCol>
+            <CCol xs={12} md={3}>
+              <CCard className="mb-4">
+                <CCardBody>
+                  <h5>Total Quotations</h5>
+                  <p>{quotations.length}</p>
+                </CCardBody>
+              </CCard>
+            </CCol>
+            <CCol xs={12} md={3}>
+              <CCard className="mb-4">
+                <CCardBody>
+                  <h5>Total Requests</h5>
+                  <p>{stats.totalRequests}</p>
+                </CCardBody>
+              </CCard>
+            </CCol>
+          </CRow>
+
+          {/* Graphs */}
+          <CRow>
             <CCol xs={12} md={6}>
               <CCard>
                 <CCardHeader>Quotation Status Distribution</CCardHeader>
@@ -134,9 +147,7 @@ const Dashboard = () => {
                 </CCardBody>
               </CCard>
             </CCol>
-          </CRow>
-          <CRow>
-            <CCol xs={12}>
+            <CCol xs={12} md={6}>
               <CCard>
                 <CCardHeader>Punch-In Trends</CCardHeader>
                 <CCardBody>
@@ -226,32 +237,18 @@ const Dashboard = () => {
                 </CCardBody>
               </CCard>
             </CCol>
-          </CRow>
-          <CRow>
             <CCol xs={12}>
               <CCard className="mb-4">
-                <CCardHeader>Requests</CCardHeader>
-                <CCardBody>
-                  <CTable hover responsive>
-                    <CTableHead>
-                      <CTableRow>
-                        <CTableHeaderCell>Request ID</CTableHeaderCell>
-                        <CTableHeaderCell>Status</CTableHeaderCell>
-                        <CTableHeaderCell>Client</CTableHeaderCell>
-                      </CTableRow>
-                    </CTableHead>
-                    <CTableBody>
-                      {requests.map((req, index) => (
-                        <CTableRow key={index}>
-                          <CTableDataCell>{req.id}</CTableDataCell>
-                          <CTableDataCell>{req.status}</CTableDataCell>
-                          <CTableDataCell>{req.clientName}</CTableDataCell>
-                        </CTableRow>
-                      ))}
-                    </CTableBody>
-                  </CTable>
+                <CCardHeader>Products (Scrollable)</CCardHeader>
+                <CCardBody style={{ maxHeight: '300px', overflowY: 'scroll' }}>
+                  {products.map((product, index) => (
+                    <div key={index}>
+                      <strong>{product.name}</strong> - Price: {product.price}, Quantity: {product.quantity}
+                    </div>
+                  ))}
                 </CCardBody>
               </CCard>
+              {/* To remove products list, delete this entire section */}
             </CCol>
           </CRow>
         </>
