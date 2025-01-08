@@ -236,30 +236,11 @@ export const fetchPunchRecords = async () => {
       });
     }
 
-    // Fetch employee names from authentication
-    for (let record of records) {
-      const user = await getAuthUser(record.userId);
-      if (user) {
-        record.displayName = user.displayName || "Unknown";
-      }
-    }
-
     console.log("Fetched Records:", records);
     return records;
   } catch (error) {
     console.error("Error fetching punch records:", error);
     throw error;
-  }
-};
-
-// Helper function to get user data from authentication
-export const getAuthUser = async (userId) => {
-  try {
-    const user = await fetchUsers(); // Assume fetchUsers fetches all authenticated users
-    return user.find((u) => u.uid === userId) || null;
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    return null;
   }
 };
 
