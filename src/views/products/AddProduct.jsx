@@ -23,7 +23,7 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await window.electron.invoke('create-product', formData); // Assume this calls the backend to add the product
+      await window.electron.invoke('create-product', formData); // This calls the backend to add the product
       // On success
       toast.success("Product added successfully!", {
         position: "top-right",
