@@ -44,7 +44,7 @@ const AppHeader = () => {
     '/quotations': 'Quotations',
     '/requests': 'Requests',
     '/products': 'Manage Products',
-    '/reports': 'Monthly Reports',
+    '/reports': 'Monthly Report',
   }
 
   // Get the current tab name based on the path

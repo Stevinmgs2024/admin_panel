@@ -77,7 +77,7 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Monthly Reports',
+    name: 'Monthly Report',
     href: 'https://docs.google.com/spreadsheets/d/1LyN1r1So2KpN7Gcz3k6dd5S46mWfKmpF2TSP7XP5Qok/edit?usp=sharing', // Replace with your URL
     icon: <CIcon icon={cilChartLine} customClassName="nav-icon" />,
     target: '_blank', // Ensures the link opens in a new tab
