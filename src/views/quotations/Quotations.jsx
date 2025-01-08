@@ -13,12 +13,14 @@ import {
   CModalFooter,
   CAlert,
   CImage,
+  CFormInput,
 } from "@coreui/react";
 import {
   fetchQuotations,
   updateQuotationStatus,
   uploadQuotationPdf,
   deleteQuotation,
+  updateQuotationSalesAmount, // New function to update sales amount
 } from "../../config/firebase";
 
 const Quotations = () => {
@@ -27,6 +29,7 @@ const Quotations = () => {
   const [selectedQuotation, setSelectedQuotation] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
   const [error, setError] = useState("");
+  const [salesAmounts, setSalesAmounts] = useState({}); // Track sales amounts input
 
   useEffect(() => {
     const loadQuotations = async () => {
@@ -76,6 +79,22 @@ const Quotations = () => {
     }
   };
 
+  const handleSalesAmountSave = async (id) => {
+    const amount = salesAmounts[id];
+    if (!amount || isNaN(amount)) {
+      setError("Please enter a valid sales amount.");
+      return;
+    }
+    try {
+      await updateQuotationSalesAmount(id, parseFloat(amount));
+      setQuotations((prev) =>
+        prev.map((q) => (q.id === id ? { ...q, salesAmount: amount } : q))
+      );
+    } catch (err) {
+      setError("Failed to save sales amount.");
+    }
+  };
+
   return (
     <div className="p-4">
       <h2>Quotations</h2>
@@ -109,6 +128,7 @@ const Quotations = () => {
             <CTableHeaderCell>Client Name</CTableHeaderCell>
             <CTableHeaderCell>Email</CTableHeaderCell>
             <CTableHeaderCell>Visits</CTableHeaderCell>
+            <CTableHeaderCell>Sales Amount</CTableHeaderCell>
             <CTableHeaderCell>Actions</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
@@ -119,6 +139,32 @@ const Quotations = () => {
               <CTableDataCell>{q.clientDetails?.name}</CTableDataCell>
               <CTableDataCell>{q.clientDetails?.email}</CTableDataCell>
               <CTableDataCell>{q.clientDetails?.visits}</CTableDataCell>
+              <CTableDataCell>
+                {statusFilter === "accepted" ? (
+                  <>
+                    <CFormInput
+                      type="number"
+                      placeholder="Enter Sales Amount"
+                      value={salesAmounts[q.id] || ""}
+                      onChange={(e) =>
+                        setSalesAmounts((prev) => ({
+                          ...prev,
+                          [q.id]: e.target.value,
+                        }))
+                      }
+                      className="mb-2"
+                    />
+                    <CButton
+                      color="success"
+                      onClick={() => handleSalesAmountSave(q.id)}
+                    >
+                      Save
+                    </CButton>
+                  </>
+                ) : (
+                  q.salesAmount || "N/A"
+                )}
+              </CTableDataCell>
               <CTableDataCell>
                 <CButton
                   color="info"
@@ -186,6 +232,7 @@ const Quotations = () => {
         </CTableBody>
       </CTable>
 
+      {/* Quotation Details Modal */}
       <CModal
         visible={!!selectedQuotation}
         onClose={() => setSelectedQuotation(null)}

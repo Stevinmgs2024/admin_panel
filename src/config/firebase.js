@@ -147,6 +147,18 @@ export const fetchQuotationById = async (id) => {
     console.error("Error fetching quotation by ID:", error);
   }
 };
+// Update sales amount for a quotation
+export const updateQuotationSalesAmount = async (id, salesAmount) => {
+  try {
+    const quotationRef = doc(db, "quotations", id);
+    await updateDoc(quotationRef, { salesAmount });
+  } catch (error) {
+    console.error("Error updating sales amount:", error);
+    throw error;
+  }
+};
+
+
 
 //Fetch punchin details
 /*export const fetchPunchRecords = async () => {
@@ -198,8 +210,6 @@ export const fetchPunchRecords = async () => {
   try {
     const employeesRef = collection(db, "employess");
     const employeeSnapshots = await getDocs(employeesRef);
-    console.log("Employee Documents:", employeeSnapshots.docs.map(doc => doc.id)); // Log employee IDs
-
     let records = [];
 
     for (const employeeDoc of employeeSnapshots.docs) {
@@ -207,11 +217,8 @@ export const fetchPunchRecords = async () => {
       const punchInsRef = collection(db, "employess", employeeId, "punch_ins");
       const punchSnapshots = await getDocs(punchInsRef);
 
-      console.log(`Documents in punch_ins for ${employeeId}:`, punchSnapshots.size);
-
       punchSnapshots.forEach((punchDoc) => {
         const punchData = punchDoc.data();
-        console.log("Punch Doc Data:", punchData);
 
         records.push({
           id: punchDoc.id,
@@ -223,11 +230,21 @@ export const fetchPunchRecords = async () => {
           timestamp: punchData.timestamp?.toDate(),
           userEmail: punchData.user_email || "",
           userId: punchData.user_id || "",
+          // Dummy name for now; fetch the actual name via authentication
+          displayName: "Loading...",
         });
       });
     }
 
-    console.log("Final Records:", records);
+    // Fetch employee names from authentication
+    for (let record of records) {
+      const user = await getAuthUser(record.userId);
+      if (user) {
+        record.displayName = user.displayName || "Unknown";
+      }
+    }
+
+    console.log("Fetched Records:", records);
     return records;
   } catch (error) {
     console.error("Error fetching punch records:", error);
@@ -235,6 +252,16 @@ export const fetchPunchRecords = async () => {
   }
 };
 
+// Helper function to get user data from authentication
+export const getAuthUser = async (userId) => {
+  try {
+    const user = await fetchUsers(); // Assume fetchUsers fetches all authenticated users
+    return user.find((u) => u.uid === userId) || null;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return null;
+  }
+};
 
 
 export const calculatePunchStatistics = (records) => {
