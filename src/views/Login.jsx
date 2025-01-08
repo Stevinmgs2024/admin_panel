@@ -36,14 +36,40 @@ const Login = () => {
     });
   };
 
-  const handleSubmitEvent = (e) => {
+  const handleSubmitEvent = async (e) => {
     e.preventDefault();
     if (email !== "" && password !== "") {
-      auth.loginAction(email, password);
-      return;
+      try {
+        const result = await auth.loginAction(email, password);
+        if (!result.success) {
+          toast.error("Invalid login. Please check your email and password.", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        }
+      } catch (error) {
+        toast.error("An error occurred during log in. Please check your email and password", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
     } else {
-      console.log("Empty fields");
-      return;
+      toast.error("Please check your email and password.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
 

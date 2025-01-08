@@ -15,14 +15,10 @@ import {
   CSpinner,
   CFormInput,
   CButton,
-  CNav,
-  CNavItem,
-  CNavLink,
-  CTabContent,
-  CTabPane,
 } from '@coreui/react';
 import { CChartBar, CChartLine } from '@coreui/react-chartjs';
 import { fetchPunchRecords, calculatePunchStatistics } from '../../config/firebase';
+import { useLocation } from 'react-router-dom';
 import '@coreui/coreui/dist/css/coreui.min.css';
 
 const PunchDetailsPage = () => {
@@ -41,17 +37,16 @@ const PunchDetailsPage = () => {
     earlyDepartures: 0,
     missingPunchOut: 0,
   });
-  const [activeTab, setActiveTab] = useState('overview');
+
+  const location = useLocation();
 
   const fetchRecords = async () => {
     setLoading(true);
     setError('');
-
     try {
       const fetchedRecords = await fetchPunchRecords();
       setRecords(fetchedRecords);
       setFilteredRecords(fetchedRecords);
-
       const calculatedStats = calculatePunchStatistics(fetchedRecords);
       setStats(calculatedStats);
     } catch (err) {
@@ -66,6 +61,16 @@ const PunchDetailsPage = () => {
     fetchRecords();
   }, []);
 
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const emailFromUrl = queryParams.get('email');
+
+    if (emailFromUrl) {
+      setFilterEmail(emailFromUrl);
+    }
+  }, [location]);
+
+  // Filter records based on email and date range
   useEffect(() => {
     let filtered = records;
 
@@ -114,172 +119,129 @@ const PunchDetailsPage = () => {
 
   return (
     <CRow>
-      <CCol xs={12}>
+      <CCol md={4}>
+        <CRow>
+          <CCol xs={12} className="mb-3">
+            <CCard>
+              <CCardBody>
+                <h6>Total Employees</h6>
+                <h4>{stats.totalEmployees}</h4>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol xs={12} className="mb-3">
+            <CCard>
+              <CCardBody>
+                <h6>Total Punches</h6>
+                <h4>{stats.totalPunches}</h4>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol xs={12} className="mb-3">
+            <CCard>
+              <CCardBody>
+                <h6>On Time</h6>
+                <h4>{stats.onTime}</h4>
+              </CCardBody>
+            </CCard>
+          </CCol>
+        </CRow>
+        <CCard className="mb-4">
+          <CCardBody>
+            <h5>Attendance Overview</h5>
+            <CChartBar data={chartData} labels="Punch Statistics" />
+          </CCardBody>
+        </CCard>
+        <CCard>
+          <CCardBody>
+            <h5>Daily Punch-ins</h5>
+            <CChartLine data={dailyPunchInsData} />
+          </CCardBody>
+        </CCard>
+      </CCol>
+      <CCol md={8}>
         <CCard>
           <CCardHeader>
-            <h4>Punch Details Dashboard</h4>
+            <h5>Punch Records</h5>
           </CCardHeader>
           <CCardBody>
-            {loading && (
-              <div className="text-center">
-                <CSpinner size="sm" />
+            <div className="d-flex flex-wrap gap-3 mb-3">
+              <CFormInput
+                type="email"
+                placeholder="Filter by Employee Email"
+                value={filterEmail}
+                onChange={(e) => setFilterEmail(e.target.value)}
+              />
+              <div className="d-flex gap-2">
+                <CFormInput
+                  type="date"
+                  value={filterDateRange.start}
+                  onChange={(e) =>
+                    setFilterDateRange((prev) => ({ ...prev, start: e.target.value }))
+                  }
+                />
+                <CFormInput
+                  type="date"
+                  value={filterDateRange.end}
+                  onChange={(e) =>
+                    setFilterDateRange((prev) => ({ ...prev, end: e.target.value }))
+                  }
+                />
               </div>
-            )}
+              <CButton
+                color="secondary"
+                onClick={() => {
+                  setFilterEmail('');
+                  setFilterDateRange({ start: '', end: '' });
+                }}
+              >
+                Clear Filters
+              </CButton>
+            </div>
+            {loading && <CSpinner />}
             {error && <CAlert color="danger">{error}</CAlert>}
-
-            <CNav variant="tabs" role="tablist">
-              <CNavItem>
-                <CNavLink
-                  active={activeTab === 'overview'}
-                  onClick={() => setActiveTab('overview')}
-                >
-                  Overview
-                </CNavLink>
-              </CNavItem>
-              <CNavItem>
-                <CNavLink
-                  active={activeTab === 'records'}
-                  onClick={() => setActiveTab('records')}
-                >
-                  Punch Records
-                </CNavLink>
-              </CNavItem>
-            </CNav>
-
-            <CTabContent>
-              <CTabPane role="tabpanel" aria-labelledby="overview-tab" visible={activeTab === 'overview'}>
-                <CRow className="mt-3">
-                  <CCol md={4}>
-                    <CRow className="mb-3">
-                      <CCol xs={12}>
-                        <CCard>
-                          <CCardBody>
-                            <h6>Total Employees</h6>
-                            <h4>{stats.totalEmployees}</h4>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                      <CCol xs={12}>
-                        <CCard>
-                          <CCardBody>
-                            <h6>Total Punches</h6>
-                            <h4>{stats.totalPunches}</h4>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                      <CCol xs={12}>
-                        <CCard>
-                          <CCardBody>
-                            <h6>On Time</h6>
-                            <h4>{stats.onTime}</h4>
-                          </CCardBody>
-                        </CCard>
-                      </CCol>
-                    </CRow>
-                  </CCol>
-                  <CCol md={8}>
-                    <CCard className="mb-4">
-                      <CCardBody>
-                        <h5>Attendance Overview</h5>
-                        <CChartBar data={chartData} labels="Punch Statistics" />
-                      </CCardBody>
-                    </CCard>
-                    <CCard>
-                      <CCardBody>
-                        <h5>Daily Punch-ins</h5>
-                        <CChartLine data={dailyPunchInsData} />
-                      </CCardBody>
-                    </CCard>
-                  </CCol>
-                </CRow>
-              </CTabPane>
-              <CTabPane role="tabpanel" aria-labelledby="records-tab" visible={activeTab === 'records'}>
-                <CRow className="mt-3">
-                  <CCol xs={12}>
-                    <div className="d-flex flex-wrap gap-3 mb-3">
-                      <CFormInput
-                        type="email"
-                        placeholder="Filter by Employee Email"
-                        value={filterEmail}
-                        onChange={(e) => setFilterEmail(e.target.value)}
-                      />
-                      <div className="d-flex gap-2">
-                        <CFormInput
-                          type="date"
-                          value={filterDateRange.start}
-                          onChange={(e) =>
-                            setFilterDateRange((prev) => ({ ...prev, start: e.target.value }))
-                          }
+            <CTable hover responsive>
+              <CTableHead>
+                <CTableRow>
+                  <CTableHeaderCell>Employee Email</CTableHeaderCell>
+                  <CTableHeaderCell>Punch In</CTableHeaderCell>
+                  <CTableHeaderCell>Punch Out</CTableHeaderCell>
+                  <CTableHeaderCell>Location</CTableHeaderCell>
+                  <CTableHeaderCell>Photo</CTableHeaderCell>
+                </CTableRow>
+              </CTableHead>
+              <CTableBody>
+                {filteredRecords.map((record, index) => (
+                  <CTableRow key={index}>
+                    <CTableDataCell>{record.userEmail}</CTableDataCell>
+                    <CTableDataCell>
+                      {record.punchInTime
+                        ? new Date(record.punchInTime).toLocaleString()
+                        : 'N/A'}
+                    </CTableDataCell>
+                    <CTableDataCell>
+                      {record.punchOutTime
+                        ? new Date(record.punchOutTime).toLocaleString()
+                        : 'Not punched out'}
+                    </CTableDataCell>
+                    <CTableDataCell>
+                      {record.location
+                        ? `${record.location.latitude.toFixed(4)}°N, ${record.location.longitude.toFixed(4)}°E`
+                        : 'N/A'}
+                    </CTableDataCell>
+                    <CTableDataCell>
+                      {record.punchInPhoto && (
+                        <img
+                          src={record.punchInPhoto}
+                          alt="Punch In"
+                          style={{ width: 50, height: 50 }}
                         />
-                        <CFormInput
-                          type="date"
-                          value={filterDateRange.end}
-                          onChange={(e) =>
-                            setFilterDateRange((prev) => ({ ...prev, end: e.target.value }))
-                          }
-                        />
-                      </div>
-                      <CButton
-                        color="secondary"
-                        onClick={() => {
-                          setFilterEmail('');
-                          setFilterDateRange({ start: '', end: '' });
-                        }}
-                      >
-                        Clear Filters
-                      </CButton>
-                    </div>
-                    <CTable hover responsive>
-                      <CTableHead>
-                        <CTableRow>
-                          <CTableHeaderCell>Employee Email</CTableHeaderCell>
-                          <CTableHeaderCell>Punch In</CTableHeaderCell>
-                          <CTableHeaderCell>Punch Out</CTableHeaderCell>
-                          <CTableHeaderCell>Location</CTableHeaderCell>
-                          <CTableHeaderCell>Photo</CTableHeaderCell>
-                        </CTableRow>
-                      </CTableHead>
-                      <CTableBody>
-                        {filteredRecords.map((record, index) => (
-                          <CTableRow key={index}>
-                            <CTableDataCell>{record.userEmail}</CTableDataCell>
-                            <CTableDataCell>
-                              {record.punchInTime
-                                ? new Date(record.punchInTime).toLocaleString()
-                                : 'N/A'}
-                            </CTableDataCell>
-                            <CTableDataCell>
-                              {record.punchOutTime
-                                ? new Date(record.punchOutTime).toLocaleString()
-                                : 'Not punched out'}
-                            </CTableDataCell>
-                            <CTableDataCell>
-                              {record.location
-                                ? `${record.location.latitude.toFixed(4)}°N, ${record.location.longitude.toFixed(4)}°E`
-                                : 'N/A'}
-                            </CTableDataCell>
-                            <CTableDataCell>
-                              {record.photoUrl && (
-                                <img
-                                  src={record.photoUrl}
-                                  alt="Punch-in photo"
-                                  style={{
-                                    width: 50,
-                                    height: 50,
-                                    borderRadius: '50%',
-                                    objectFit: 'cover',
-                                  }}
-                                />
-                              )}
-                            </CTableDataCell>
-                          </CTableRow>
-                        ))}
-                      </CTableBody>
-                    </CTable>
-                  </CCol>
-                </CRow>
-              </CTabPane>
-            </CTabContent>
+                      )}
+                    </CTableDataCell>
+                  </CTableRow>
+                ))}
+              </CTableBody>
+            </CTable>
           </CCardBody>
         </CCard>
       </CCol>
@@ -288,4 +250,3 @@ const PunchDetailsPage = () => {
 };
 
 export default PunchDetailsPage;
-

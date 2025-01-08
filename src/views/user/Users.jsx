@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';  // Import the useNavigate hook
+import { useNavigate } from 'react-router-dom'; // Updated to useNavigate
 import { CCard, CCardBody, CCardHeader, CCol, CRow, CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CButton, CSpinner, CAlert } from "@coreui/react";
 import { fetchUsers, fetchUserRole } from "../../../dataFetcher";
 
@@ -12,6 +12,7 @@ function Users() {
 
   const navigate = useNavigate();  // Initialize the navigate hook
 
+  // Effect to fetch user data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -21,7 +22,7 @@ function Users() {
           fetchedUsers.map((user) => fetchUserRole(user.uid))
         );
 
-        setUsers(fetchedUsers || []); // Fallback to empty array if null
+        setUsers(fetchedUsers || []);
         setRoles(fetchedRoles || []);
       } catch (err) {
         setError(err.message);
@@ -33,17 +34,9 @@ function Users() {
     fetchData();
   }, []);
 
-  const toggleDescription = (userId) => {
-    setExpandedUser(expandedUser === userId ? null : userId);
-  };
-
-  const openEdit = (userId) => {
-    console.log(userId);
-    navigate(`/users/edit/${userId}`);
-  };
-
-  const addUser = () => {
-    navigate('/users/add');  // Navigate to the '/add-user' route
+  // Function to navigate to the Punch Details page with email filter
+  const openPunchDetails = (employeeEmail) => {
+    navigate(`/punch-details?email=${employeeEmail}`);  // Pass email as query param
   };
 
   return (
@@ -52,9 +45,6 @@ function Users() {
         <CCard className="mb-4">
           <CCardHeader className="d-flex justify-content-between align-items-center">
             <span>Users List</span>
-            <CButton color="primary" onClick={addUser}>  {/* Add User Button */}
-              Add User
-            </CButton>
           </CCardHeader>
           <CCardBody>
             {loading && (
@@ -73,40 +63,25 @@ function Users() {
                     <CTableHeaderCell>Email</CTableHeaderCell>
                     <CTableHeaderCell>Role</CTableHeaderCell>
                     <CTableHeaderCell>Actions</CTableHeaderCell>
-                    <CTableHeaderCell>Update</CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
                   {users.map((user, index) => (
-                    <React.Fragment key={user.uid}>
-                      <CTableRow>
-                        <CTableDataCell>{index + 1}</CTableDataCell>
-                        <CTableDataCell>{user.displayName}</CTableDataCell>
-                        <CTableDataCell>{user.email}</CTableDataCell>
-                        <CTableDataCell>{roles[index]}</CTableDataCell>
-                        <CTableDataCell>
-                          <CButton
-                            color="primary"
-                            size="sm"
-                            onClick={() => toggleDescription(user.uid)}
-                          >
-                            {expandedUser === user.uid ? "Hide" : "Show"} Password Hash
-                          </CButton>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <CButton color="info" size="sm" onClick={() => openEdit(user.uid)}>
-                            Update
-                          </CButton>
-                        </CTableDataCell>
-                      </CTableRow>
-                      {expandedUser === user.uid && (
-                        <CTableRow>
-                          <CTableDataCell colSpan="6">
-                            <strong>Password Hash:</strong> {user.passwordHash}
-                          </CTableDataCell>
-                        </CTableRow>
-                      )}
-                    </React.Fragment>
+                    <CTableRow key={user.uid}>
+                      <CTableDataCell>{index + 1}</CTableDataCell>
+                      <CTableDataCell>{user.displayName}</CTableDataCell>
+                      <CTableDataCell>{user.email}</CTableDataCell>
+                      <CTableDataCell>{roles[index]}</CTableDataCell>
+                      <CTableDataCell>
+                        <CButton
+                          color="primary"
+                          size="sm"
+                          onClick={() => openPunchDetails(user.email)}  // Pass email to the function
+                        >
+                          Show Records
+                        </CButton>
+                      </CTableDataCell>
+                    </CTableRow>
                   ))}
                 </CTableBody>
               </CTable>

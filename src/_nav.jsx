@@ -21,6 +21,7 @@ import {
   cilLibrary,
   cilPaperPlane,
   cilTask,
+  cilChartLine,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -69,6 +70,17 @@ const _nav = [
     name: 'Manage Products',
     to: '/products',
     icon: <CIcon icon={cilLibrary} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'Finance'
+  },
+  {
+    component: CNavItem,
+    name: 'Monthly Reports',
+    href: 'https://docs.google.com/spreadsheets/d/1LyN1r1So2KpN7Gcz3k6dd5S46mWfKmpF2TSP7XP5Qok/edit?usp=sharing', // Replace with your URL
+    icon: <CIcon icon={cilChartLine} customClassName="nav-icon" />,
+    target: '_blank', // Ensures the link opens in a new tab
   },
 ]
 
