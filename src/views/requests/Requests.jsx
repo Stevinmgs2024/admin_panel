@@ -18,10 +18,23 @@ import {
 } from "@coreui/react";
 import {
   getPendingRequests,
-  getQuotationById,
+  fetchQuotationById,
   updateRequest,
   updateQuotation,
 } from "../../config/firebase";
+
+const fetchClientAndUserName = async (qid) => {
+  try {
+    const quotation = await fetchQuotationById(qid);
+    return {
+      clientName: quotation.clientDetails?.name || "N/A",
+      username: quotation.username || "N/A",
+    };
+  } catch (error) {
+    console.error(`Error fetching client and username for QID: ${qid}`, error);
+    return { clientName: "N/A", username: "N/A" };
+  }
+};
 
 const Requests = () => {
   const [requests, setRequests] = useState([]);
@@ -30,16 +43,23 @@ const Requests = () => {
   const [quotationDetails, setQuotationDetails] = useState(null);
 
   useEffect(() => {
-    const fetchRequests = async () => {
+    const fetchRequestsWithDetails = async () => {
       const data = await getPendingRequests();
-      setRequests(data);
+      const detailedRequests = await Promise.all(
+        data.map(async (request) => {
+          const { clientName, username } = await fetchClientAndUserName(request.qid);
+          return { ...request, clientName, username };
+        })
+      );
+      setRequests(detailedRequests);
     };
-    fetchRequests();
+
+    fetchRequestsWithDetails();
   }, []);
 
   const handleDescription = async (request) => {
     try {
-      const quotation = await getQuotationById(request.qid);
+      const quotation = await fetchQuotationById(request.qid);
       setSelectedRequest(request);
       setQuotationDetails(quotation);
       setModalVisible(true);
@@ -71,7 +91,13 @@ const Requests = () => {
 
   const refreshRequests = async () => {
     const data = await getPendingRequests();
-    setRequests(data);
+    const detailedRequests = await Promise.all(
+      data.map(async (request) => {
+        const { clientName, username } = await fetchClientAndUserName(request.qid);
+        return { ...request, clientName, username };
+      })
+    );
+    setRequests(detailedRequests);
   };
 
   return (
@@ -82,7 +108,7 @@ const Requests = () => {
           <CTable hover responsive>
             <CTableHead>
               <CTableRow>
-                <CTableHeaderCell>User ID</CTableHeaderCell>
+                <CTableHeaderCell>Username</CTableHeaderCell>
                 <CTableHeaderCell>Client Name</CTableHeaderCell>
                 <CTableHeaderCell>Actions</CTableHeaderCell>
               </CTableRow>
@@ -90,7 +116,7 @@ const Requests = () => {
             <CTableBody>
               {requests.map((request, index) => (
                 <CTableRow key={index}>
-                  <CTableDataCell>{request.userid}</CTableDataCell>
+                  <CTableDataCell>{request.username}</CTableDataCell>
                   <CTableDataCell>{request.clientName}</CTableDataCell>
                   <CTableDataCell>
                     <CButton color="info" onClick={() => handleDescription(request)}>
@@ -114,9 +140,6 @@ const Requests = () => {
         <CModal visible={modalVisible} onClose={() => setModalVisible(false)} size="lg">
           <CModalHeader>Request Details</CModalHeader>
           <CModalBody>
-            <h5>Request Text</h5>
-            <p>{selectedRequest.request}</p>
-            <h5>Client Details</h5>
             <CImage
               src={quotationDetails.clientDetails?.profileImage}
               alt="Profile"
@@ -126,7 +149,7 @@ const Requests = () => {
               style={{ objectFit: "cover" }}
             />
             <p>
-              <strong>Name:</strong> {quotationDetails.clientDetails?.name}
+              <strong>Client Name:</strong> {quotationDetails.clientDetails?.name}
             </p>
             <p>
               <strong>Contact:</strong> {quotationDetails.clientDetails?.contact}
@@ -137,7 +160,25 @@ const Requests = () => {
             <p>
               <strong>Visits:</strong> {quotationDetails.clientDetails?.visits}
             </p>
-            {/*code to show quotation product details should go here*/}
+            <h6>Products:</h6>
+            <CTable>
+              <CTableHead>
+                <CTableRow>
+                  <CTableHeaderCell>Name</CTableHeaderCell>
+                  <CTableHeaderCell>Price</CTableHeaderCell>
+                  <CTableHeaderCell>Quantity</CTableHeaderCell>
+                </CTableRow>
+              </CTableHead>
+              <CTableBody>
+                {quotationDetails.clientDetails?.products?.map((product, idx) => (
+                  <CTableRow key={idx}>
+                    <CTableDataCell>{product.name}</CTableDataCell>
+                    <CTableDataCell>{product.price}</CTableDataCell>
+                    <CTableDataCell>{product.quantity}</CTableDataCell>
+                  </CTableRow>
+                ))}
+              </CTableBody>
+            </CTable>
           </CModalBody>
           <CModalFooter>
             <CButton color="secondary" onClick={() => setModalVisible(false)}>

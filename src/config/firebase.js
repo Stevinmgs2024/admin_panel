@@ -322,7 +322,7 @@ export const calculatePunchStatistics = (records) => {
 
 // Fetch all pending requests
 export const getPendingRequests = async () => {
-  const querySnapshot = await getDocs(collection(db, "requests"));
+  const querySnapshot = await getDocs(collection(db, "editrequests"));
   const data = [];
   querySnapshot.forEach((doc) => {
     const request = doc.data();
@@ -363,22 +363,23 @@ export const getPendingRequests = async () => {
     throw error;
   }
 };*/
-
-
-// Fetch quotation by ID
-export const getQuotationById = async (qid) => {
-  const quotationRef = doc(db, "quotations", qid);
-  const docSnap = await getDoc(quotationRef);
-
-  if (docSnap.exists()) {
-    return { id: docSnap.id, ...docSnap.data() };
-  } else {
-    throw new Error("Quotation not found");
+//request client and username fetch
+const fetchClientAndUserName = async (qid) => {
+  try {
+    const quotation = await fetchQuotationById(qid);
+    return {
+      clientName: quotation.clientDetails?.name || "N/A",
+      username: quotation.username || "N/A",
+    };
+  } catch (error) {
+    console.error(`Error fetching client and username for QID: ${qid}`, error);
+    return { clientName: "N/A", username: "N/A" };
   }
 };
+
 // Update request status
 export const updateRequest = async (id, data) => {
-  const docRef = doc(db, "requests", id);
+  const docRef = doc(db, "editrequests", id);
   await updateDoc(docRef, data);
 };
 
