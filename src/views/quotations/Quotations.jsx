@@ -20,16 +20,16 @@ import {
   updateQuotationStatus,
   uploadQuotationPdf,
   deleteQuotation,
-  updateQuotationSalesAmount, // New function to update sales amount
+  updateQuotationSalesAmount,
 } from "../../config/firebase";
 
 const Quotations = () => {
   const [quotations, setQuotations] = useState([]);
   const [statusFilter, setStatusFilter] = useState("pending");
   const [selectedQuotation, setSelectedQuotation] = useState(null);
-  const [pdfFile, setPdfFile] = useState(null);
+  const [pdfUrl, setPdfUrl] = useState("");
   const [error, setError] = useState("");
-  const [salesAmounts, setSalesAmounts] = useState({}); // Track sales amounts input
+  const [salesAmounts, setSalesAmounts] = useState({});
 
   useEffect(() => {
     const loadQuotations = async () => {
@@ -59,13 +59,16 @@ const Quotations = () => {
   };
 
   const handlePdfUpload = async () => {
-    if (!pdfFile || !selectedQuotation) return;
+    if (!pdfUrl || !selectedQuotation) {
+      setError("Please enter a valid PDF URL");
+      return;
+    }
     try {
-      const pdfUrl = URL.createObjectURL(pdfFile);
       await uploadQuotationPdf(selectedQuotation.id, pdfUrl);
-      setPdfFile(null);
+      setPdfUrl("");
       setSelectedQuotation(null);
     } catch (err) {
+      console.log(err);
       setError("Failed to upload PDF.");
     }
   };
@@ -235,7 +238,11 @@ const Quotations = () => {
       {/* Quotation Details Modal */}
       <CModal
         visible={!!selectedQuotation}
-        onClose={() => setSelectedQuotation(null)}
+        onClose={() => {
+          setSelectedQuotation(null);
+          setPdfUrl("");
+          setError("");
+        }}
       >
         <CModalHeader>Quotation Details</CModalHeader>
         <CModalBody>
@@ -308,9 +315,18 @@ const Quotations = () => {
             Close
           </CButton>
           {statusFilter === "accepted" && (
-            <CButton color="primary" onClick={handlePdfUpload}>
-              Upload PDF
-            </CButton>
+            <>
+              <CFormInput 
+                type="text"
+                placeholder="Enter PDF URL"
+                value={pdfUrl}
+                onChange={(e) => setPdfUrl(e.target.value)}
+                className="me-2"
+              />
+              <CButton color="primary" onClick={handlePdfUpload}>
+                Save PDF URL
+              </CButton>
+            </>
           )}
         </CModalFooter>
       </CModal>

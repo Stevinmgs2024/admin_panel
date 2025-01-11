@@ -96,5 +96,15 @@ ipcMain.on('show-error', (event, title, content) => {
   dialog.showErrorBox(title, content);
 });
 
+// Listen for the dialog open request from the renderer process
+ipcMain.handle('open-file-dialog', async () => {
+  console.log("popo")
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    filters: [{ name: 'PDF Files', extensions: ['pdf'] }],
+  });
+
+  return result.filePaths[0]; // Return the selected file path
+});
 // Start the application
 app.whenReady().then(createWindow);

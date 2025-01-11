@@ -38,13 +38,22 @@ function Users() {
   const openPunchDetails = (employeeEmail) => {
     navigate(`/punch-details?email=${employeeEmail}`);  // Pass email as query param
   };
-
+  const addUser = () => {
+    navigate('/users/add');
+  }
+  const openEdit = (userId) => {
+    console.log(userId);
+    navigate(`/users/edit/${userId}`);
+  };
   return (
     <CRow>
       <CCol xs={12}>
         <CCard className="mb-4">
           <CCardHeader className="d-flex justify-content-between align-items-center">
             <span>Users List</span>
+            <CButton color="primary" onClick={addUser}>  {/* Add User Button */}
+              Add User
+            </CButton>
           </CCardHeader>
           <CCardBody>
             {loading && (
@@ -63,6 +72,7 @@ function Users() {
                     <CTableHeaderCell>Email</CTableHeaderCell>
                     <CTableHeaderCell>Role</CTableHeaderCell>
                     <CTableHeaderCell>Actions</CTableHeaderCell>
+                    <CTableHeaderCell>Update</CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
@@ -81,6 +91,11 @@ function Users() {
                           Show Records
                         </CButton>
                       </CTableDataCell>
+                      <CTableDataCell>
+                          <CButton color="info" size="sm" onClick={() => openEdit(user.uid)}>
+                            Update
+                          </CButton>
+                        </CTableDataCell>
                     </CTableRow>
                   ))}
                 </CTableBody>
